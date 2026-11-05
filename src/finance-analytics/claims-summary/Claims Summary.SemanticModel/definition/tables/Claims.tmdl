@@ -25,3 +25,4 @@ table 'Claims'
 				    Source = #table(type table [Month = text, Amount = number], {{"2026-01", 1200.5}, {"2026-02", 980.25}})
 				in
 				    Source
+
