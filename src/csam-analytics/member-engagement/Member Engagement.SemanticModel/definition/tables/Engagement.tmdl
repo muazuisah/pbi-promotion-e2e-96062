@@ -25,3 +25,4 @@ table 'Engagement'
 				    Source = #table(type table [Month = text, Amount = number], {{"2026-01", 410}, {"2026-02", 455}})
 				in
 				    Source
+
