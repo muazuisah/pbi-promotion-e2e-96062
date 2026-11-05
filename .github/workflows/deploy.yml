@@ -28,10 +28,10 @@ on:
 permissions:
   contents: read
 
-# Promotions run one at a time and in order; a queued run never cancels one in progress.
-concurrency:
-  group: promote-main
-  cancel-in-progress: false
+# No concurrency group on purpose: GitHub keeps only one pending run per group and cancels the
+# others, which would silently drop a merged change. Runs may overlap instead; each deploy job
+# skips units that a newer commit on main has changed (that commit's own run deploys them), so an
+# older run never overwrites newer content.
 
 jobs:
   plan:
@@ -105,6 +105,7 @@ jobs:
       units: ${{ needs.plan.outputs.units }}
       sha: ${{ github.sha }}
       dry_run: ${{ needs.plan.outputs.dry_run == 'true' }}
+      skip_superseded: true
     secrets: inherit
 
   prod:
@@ -120,4 +121,5 @@ jobs:
       units: ${{ needs.plan.outputs.units }}
       sha: ${{ github.sha }}
       dry_run: ${{ needs.plan.outputs.dry_run == 'true' }}
+      skip_superseded: true
     secrets: inherit

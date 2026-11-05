@@ -53,6 +53,23 @@ def changed_files(repo: Path, base: str, head: str, mode: str = "two-dot") -> li
     return sorted({p for p in out.split("\0") if p})
 
 
+def superseded_units(repo: Path, commit: str, newer_ref: str, units: list[str], src_root: str = "src") -> list[str]:
+    """Return the units that a commit after `commit` on `newer_ref` has changed.
+
+    Such a commit triggers its own promotion run, so deploying the unit from the older commit
+    would at best be redundant and at worst overwrite newer content.
+    """
+    _check_ref(commit, "commit")
+    _check_ref(newer_ref, "newer ref")
+    rev_parse(repo, newer_ref)
+    newer: list[str] = []
+    for unit in units:
+        out = _git(repo, "log", "-1", "--format=%H", f"{commit}..{newer_ref}", "--", f"{src_root}/{unit}")
+        if out.strip():
+            newer.append(unit)
+    return newer
+
+
 def rev_parse(repo: Path, ref: str) -> str:
     _check_ref(ref, "ref")
     return _git(repo, "rev-parse", "--verify", f"{ref}^{{commit}}").strip()

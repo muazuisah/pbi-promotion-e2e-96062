@@ -48,6 +48,9 @@ param(
     # Deploy work branches to dev from GitHub Actions (otherwise developers publish to dev from Desktop).
     [switch]$EnableDevAutoDeploy,
 
+    # Let the person who triggered a deployment approve it (not recommended outside testing).
+    [switch]$AllowSelfReview,
+
     [switch]$SkipRulesets
 )
 
@@ -90,13 +93,19 @@ function Set-Environment {
 
     $body = @{
         deployment_branch_policy = @{ protected_branches = $false; custom_branch_policies = $true }
-        prevent_self_review      = $false
     }
     if ($Reviewers.Count -gt 0) {
         $body.reviewers = @($Reviewers | ForEach-Object { Resolve-Reviewer $_ })
-        $body.prevent_self_review = $true
+        $body.prevent_self_review = -not $AllowSelfReview.IsPresent
     }
-    Invoke-Gh @('api', '--method', 'PUT', "repos/$Repository/environments/$Name") ($body | ConvertTo-Json -Depth 5) | Out-Null
+    try {
+        Invoke-Gh @('api', '--method', 'PUT', "repos/$Repository/environments/$Name") ($body | ConvertTo-Json -Depth 5) | Out-Null
+    } catch {
+        if ($_.Exception.Message -match 'billing plan') {
+            throw "Environment '$Name': required reviewers on a private repository need GitHub Team or Enterprise. Upgrade the plan, or rerun without reviewers for this environment (deployments would then not wait for approval).`n$($_.Exception.Message)"
+        }
+        throw
+    }
 
     $existing = Invoke-Gh @('api', "repos/$Repository/environments/$Name/deployment-branch-policies", '--jq', '.branch_policies[].name')
     $existingNames = @($existing -split "`n" | Where-Object { $_ })

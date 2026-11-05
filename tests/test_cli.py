@@ -161,6 +161,27 @@ def test_deploy_dry_run_writes_report(repo, tmp_path, actions_env):
     assert "Deployment to `prod` (dry run)" in actions_env[1].read_text(encoding="utf-8")
 
 
+def test_deploy_skips_units_superseded_on_main(repo, commit, tmp_path, actions_env, capsys):
+    older = _change(repo, CLAIMS_TMDL, commit)
+    _change(repo, CLAIMS_TMDL, commit)  # a newer merge touching the same unit
+    report = tmp_path / "report.json"
+    units = '["finance-analytics/claims-summary", "finance-analytics/executive-kpis"]'
+    base = ["deploy", "--repo-root", str(repo), "--config-root", str(repo / "config"), "--env", "test",
+            "--units-json", units, "--dry-run", "--report", str(report)]
+
+    assert main([*base, "--commit", older, "--skip-superseded-by", "HEAD"]) == 0
+    deployed = [r["team"] for r in json.loads(report.read_text(encoding="utf-8"))["results"]]
+    assert deployed == ["finance-analytics"]
+    assert json.loads(report.read_text(encoding="utf-8"))["results"][0]["units"] == ["finance-analytics/executive-kpis"]
+    assert "::warning::Skipping finance-analytics/claims-summary" in capsys.readouterr().out
+
+    head = git(repo, "rev-parse", "HEAD")
+    assert main([*base, "--commit", head, "--skip-superseded-by", "HEAD"]) == 0
+    assert len(json.loads(report.read_text(encoding="utf-8"))["results"][0]["units"]) == 2
+
+    assert main([*base[:-2], "--skip-superseded-by", "HEAD"]) == 2
+
+
 def test_unknown_ref_is_exit_2(repo):
     assert main(["plan", "--repo-root", str(repo), "--config-root", str(repo / "config"),
                  "--base", "does-not-exist", "--head", "HEAD"]) == 2

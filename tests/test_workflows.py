@@ -81,7 +81,9 @@ def test_deploy_pipeline_order_and_protection():
         assert jobs[job]["uses"] == "./.github/workflows/_deploy.yml"
         assert jobs[job]["permissions"]["id-token"] == "write"
         assert jobs[job]["with"]["sha"] == "${{ github.sha }}"
-    assert wf["concurrency"]["cancel-in-progress"] is False
+        assert jobs[job]["with"]["skip_superseded"] is True
+    # A concurrency group would cancel queued promotion runs and silently drop merged changes.
+    assert "concurrency" not in wf
     assert wf["on"]["push"]["branches"] == ["main"]
     assert wf["on"]["workflow_dispatch"]["inputs"]["units"]["required"] is True
     plan_run = "\n".join(s.get("run", "") for s in jobs["plan"]["steps"])
@@ -93,11 +95,14 @@ def test_reusable_deploy_runs_in_environment():
     wf = _load(WORKFLOW_DIR / "_deploy.yml")
     job = wf["jobs"]["deploy"]
     assert job["environment"] == "${{ inputs.environment }}"
-    assert job["concurrency"]["cancel-in-progress"] is False
-    assert set(wf["on"]["workflow_call"]["inputs"]) == {"environment", "units", "sha", "dry_run"}
+    assert "concurrency" not in job and "concurrency" not in wf
+    assert set(wf["on"]["workflow_call"]["inputs"]) == {"environment", "units", "sha", "dry_run", "skip_superseded"}
+    checkout = next(s for s in job["steps"] if s.get("uses", "").startswith("actions/checkout@"))
+    assert checkout["with"]["fetch-depth"] == 0, "the superseded check needs origin/main history"
     deploy = next(s for s in job["steps"] if "pbi_promote" in s.get("run", ""))
     assert deploy["env"]["AZURE_CLIENT_ID"] == "${{ vars.AZURE_CLIENT_ID }}"
     assert "--units-json" in deploy["run"] and "--dry-run" in deploy["run"]
+    assert "--skip-superseded-by origin/main" in deploy["run"]
     upload = next(s for s in job["steps"] if s.get("uses", "").startswith("actions/upload-artifact@"))
     assert upload["if"] == "always()"
 

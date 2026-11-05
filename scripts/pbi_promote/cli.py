@@ -14,7 +14,7 @@ from pbi_promote.config import ENVIRONMENTS, ConfigError, load_config
 from pbi_promote.deploy import deploy
 from pbi_promote.findings import Findings
 from pbi_promote.ghactions import add_summary, in_actions, set_output
-from pbi_promote.gitutil import GitError, changed_files
+from pbi_promote.gitutil import GitError, changed_files, superseded_units
 from pbi_promote.governance import check_branch, check_pull_request
 from pbi_promote.plan import build_plan
 from pbi_promote.units import SelectorError
@@ -114,6 +114,19 @@ def cmd_deploy(args) -> int:
         raise ConfigError(f"--units-json is not valid JSON: {exc}") from exc
     if not isinstance(units, list) or not all(isinstance(u, str) and UNIT_KEY_RE.match(u) for u in units):
         raise ConfigError("--units-json must be a JSON list of 'team/unit' strings.")
+    if args.skip_superseded_by:
+        if not args.commit:
+            raise ConfigError("--skip-superseded-by needs --commit.")
+        newer = superseded_units(
+            Path(args.repo_root), args.commit, args.skip_superseded_by, units, config.governance.src_root
+        )
+        for unit in newer:
+            msg = (
+                f"Skipping {unit}: a newer commit on {args.skip_superseded_by} changes it, "
+                "and the run for that commit deploys it."
+            )
+            print(f"::warning::{msg}" if in_actions() else f"WARNING: {msg}")
+        units = [u for u in units if u not in newer]
     if not units:
         print("Nothing to deploy.")
         return 0
@@ -179,6 +192,12 @@ def build_parser() -> argparse.ArgumentParser:
     p.add_argument("--dry-run", action="store_true")
     p.add_argument("--commit")
     p.add_argument("--report", help="Write a JSON deployment report here.")
+    p.add_argument(
+        "--skip-superseded-by",
+        metavar="REF",
+        help="Skip units changed by a commit after --commit on REF (e.g. origin/main), so an older run never "
+        "overwrites newer content.",
+    )
     p.set_defaults(func=cmd_deploy)
     return parser
 
