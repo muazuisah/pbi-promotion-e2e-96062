@@ -1,0 +1,5 @@
+expression SqlServer = "dev-sql.abcbs.example" meta [IsParameterQuery=true, Type="Text", IsParameterQueryRequired=true]
+	lineageTag: dbde5154-55d8-5862-90b2-951df4ec576e
+
+expression SqlDatabase = "FinanceDev" meta [IsParameterQuery=true, Type="Text", IsParameterQueryRequired=true]
+	lineageTag: 98ef14be-c338-5079-83a5-111e63dc455a

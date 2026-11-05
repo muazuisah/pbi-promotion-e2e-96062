@@ -1,0 +1,35 @@
+# fabric-cicd parameter file: environment-specific values replaced at deploy time.
+# Reference: https://microsoft.github.io/fabric-cicd/latest/how_to/parameterization/
+#
+# Rules for this repository:
+#   - Keys under replace_value must be the environment names dev, test and prod.
+#   - Filter with item_type and item_name, NOT file_path. Units are copied into a
+#     temporary staging folder before publishing, so repository file paths do not
+#     match at deploy time.
+#   - Owned by the platform team (see CODEOWNERS). Teams request changes through a
+#     platform pull request.
+
+find_replace:
+  # Sample: the sample semantic models declare a Power Query parameter "SqlServer"
+  # whose value is the dev server. Each environment gets its own server.
+  - find_value: "dev-sql.abcbs.example"
+    replace_value:
+      dev: "dev-sql.abcbs.example"
+      test: "test-sql.abcbs.example"
+      prod: "prod-sql.abcbs.example"
+    item_type: "SemanticModel"
+
+  # Sample: a value that only applies to one team's models, selected by item name.
+  - find_value: "FinanceDev"
+    replace_value:
+      dev: "FinanceDev"
+      test: "FinanceTest"
+      prod: "FinanceProd"
+    item_type: "SemanticModel"
+    item_name: ["Claims Summary", "Executive KPIs"]
+
+# Bind semantic models to existing gateway or cloud connections after publishing
+# (uncomment and fill in when the connection IDs are known):
+# semantic_model_binding:
+#   - connection_id: "<connection-guid>"
+#     semantic_model_name: ["Claims Summary"]

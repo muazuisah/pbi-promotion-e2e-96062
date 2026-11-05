@@ -1,0 +1,22 @@
+# Power BI Desktop (PBIP): user-specific settings and local data caches must never be committed.
+**/.pbi/localSettings.json
+**/.pbi/cache.abf
+*.abf
+*.pbix
+*.pbit
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+.pytest_cache/
+
+# Deployment output
+deploy-report*.json
+.artifacts/
+
+# OS / editor
+.DS_Store
+Thumbs.db
+.vscode/

@@ -1,0 +1,22 @@
+{
+  "$comment": "Central rules enforced by pull request validation and the deployment workflows. Owned by the platform team.",
+  "branchNamePattern": "^(?P<workItem>(STRY|RITM|INC)[0-9]{7})(-[a-z0-9][a-z0-9-]*)?$",
+  "pullRequestTitlePattern": "^(?P<workItem>(STRY|RITM|INC)[0-9]{7})(:| -| ) *\\S",
+  "exemptBranchPatterns": [
+    "^dependabot/"
+  ],
+  "maxTeamsPerPullRequest": 1,
+  "allowMixedPlatformAndTeamChanges": false,
+  "srcRoot": "src",
+  "workspaceFolderMode": "preserve",
+  "itemTypes": [
+    "SemanticModel",
+    "Report"
+  ],
+  "forbiddenFilePatterns": [
+    "(?i)\\.pbix$",
+    "(?i)(^|/)\\.pbi/localSettings\\.json$",
+    "(?i)(^|/)\\.pbi/cache\\.abf$",
+    "(?i)\\.abf$"
+  ]
+}

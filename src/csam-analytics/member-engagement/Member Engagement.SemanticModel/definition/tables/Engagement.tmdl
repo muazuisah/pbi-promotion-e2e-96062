@@ -1,0 +1,27 @@
+table 'Engagement'
+	lineageTag: 65d149b5-9df3-5ad8-b2bd-efaa9b3eda8f
+
+	measure 'Total Amount' = SUM('Engagement'[Amount])
+		formatString: #,0.00
+		lineageTag: 51190cfb-1ec0-5875-b51e-2806bb687646
+
+	column Month
+		dataType: string
+		lineageTag: c3d9860a-4a41-592f-9f3d-891ec68f339f
+		summarizeBy: none
+		sourceColumn: Month
+
+	column Amount
+		dataType: double
+		lineageTag: 1e4b095d-9997-56d1-8a30-d468bf39be19
+		summarizeBy: sum
+		sourceColumn: Amount
+
+	partition 'Engagement' = m
+		mode: import
+		source =
+				let
+				    // Sample data so the model refreshes without a data source; replace with a real query.
+				    Source = #table(type table [Month = text, Amount = number], {{"2026-01", 410}, {"2026-02", 455}})
+				in
+				    Source

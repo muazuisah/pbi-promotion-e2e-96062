@@ -1,0 +1,23 @@
+{
+  "$comment": "One entry per team. The key must equal the folder name under src/. Replace the placeholder workspace GUIDs (all zeros) with the real dev, test and prod workspace IDs before the first live deployment; deployments refuse placeholder IDs unless they are dry runs.",
+  "teams": {
+    "csam-analytics": {
+      "displayName": "CSAM Analytics",
+      "reviewers": "@ORG/csam-analytics-reviewers",
+      "workspaces": {
+        "dev": "00000000-0000-0000-0000-000000000000",
+        "test": "00000000-0000-0000-0000-000000000000",
+        "prod": "00000000-0000-0000-0000-000000000000"
+      }
+    },
+    "finance-analytics": {
+      "displayName": "Finance Analytics",
+      "reviewers": "@ORG/finance-analytics-reviewers",
+      "workspaces": {
+        "dev": "00000000-0000-0000-0000-000000000000",
+        "test": "00000000-0000-0000-0000-000000000000",
+        "prod": "00000000-0000-0000-0000-000000000000"
+      }
+    }
+  }
+}

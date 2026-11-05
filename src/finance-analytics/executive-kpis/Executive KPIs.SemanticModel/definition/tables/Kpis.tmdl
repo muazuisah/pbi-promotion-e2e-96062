@@ -1,0 +1,27 @@
+table 'Kpis'
+	lineageTag: 3bc2816f-10a9-599c-a030-179ba26d88e7
+
+	measure 'Total Amount' = SUM('Kpis'[Amount])
+		formatString: #,0.00
+		lineageTag: be2af489-3655-5efa-980a-b97efaac097d
+
+	column Month
+		dataType: string
+		lineageTag: 0dc73309-e8f3-5570-b227-384e75abb16f
+		summarizeBy: none
+		sourceColumn: Month
+
+	column Amount
+		dataType: double
+		lineageTag: a85a076c-b87f-5375-aa52-934ece01914b
+		summarizeBy: sum
+		sourceColumn: Amount
+
+	partition 'Kpis' = m
+		mode: import
+		source =
+				let
+				    // Sample data so the model refreshes without a data source; replace with a real query.
+				    Source = #table(type table [Month = text, Amount = number], {{"2026-01", 1.02}, {"2026-02", 0.97}})
+				in
+				    Source

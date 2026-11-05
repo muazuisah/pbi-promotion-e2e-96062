@@ -1,0 +1,68 @@
+# Optional: deploy a work branch's changed units to the team's dev workspace on every push.
+# Off by default; set the repository variable DEV_AUTO_DEPLOY to 'true' to turn it on.
+# Developers can keep publishing to dev from Power BI Desktop instead.
+name: Deploy to dev
+
+on:
+  push:
+    branches-ignore: [main]
+    paths: ["src/**"]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: deploy-dev-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  plan:
+    name: Plan (dev)
+    if: vars.DEV_AUTO_DEPLOY == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    outputs:
+      units: ${{ steps.plan.outputs.units }}
+      has_changes: ${{ steps.plan.outputs.has_changes }}
+    steps:
+      - name: Check out
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Set up Python
+        uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5.6.0
+        with:
+          python-version: "3.12"
+
+      - name: Check branch name
+        env:
+          PYTHONPATH: scripts
+          BRANCH: ${{ github.ref_name }}
+        run: python -m pbi_promote check-branch --branch "$BRANCH"
+
+      - name: Work out what to deploy
+        id: plan
+        env:
+          PYTHONPATH: scripts
+          SHA: ${{ github.sha }}
+          DRY_RUN: ${{ vars.DEPLOY_DRY_RUN }}
+        run: |
+          args=(plan --base origin/main --head "$SHA" --diff-mode three-dot --env dev --enforce-team-limit --title "Dev deployment")
+          if [ "$DRY_RUN" = "true" ]; then args+=(--allow-placeholder); fi
+          python -m pbi_promote "${args[@]}"
+
+  dev:
+    name: Dev
+    needs: plan
+    if: needs.plan.outputs.has_changes == 'true'
+    permissions:
+      contents: read
+      id-token: write
+    uses: ./.github/workflows/_deploy.yml
+    with:
+      environment: dev
+      units: ${{ needs.plan.outputs.units }}
+      sha: ${{ github.sha }}
+    secrets: inherit

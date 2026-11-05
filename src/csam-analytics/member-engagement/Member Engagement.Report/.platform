@@ -1,0 +1,11 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/gitIntegration/platformProperties/2.0.0/schema.json",
+  "metadata": {
+    "type": "Report",
+    "displayName": "Member Engagement"
+  },
+  "config": {
+    "version": "2.0",
+    "logicalId": "da4f4275-ea86-57d2-a9bd-f640522fff16"
+  }
+}

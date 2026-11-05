@@ -1,0 +1,27 @@
+table 'Claims'
+	lineageTag: f6fae31d-12f9-5e4e-8627-427da52daf58
+
+	measure 'Total Amount' = SUM('Claims'[Amount])
+		formatString: #,0.00
+		lineageTag: 56f86fa5-69f0-52be-ac14-721338eb8789
+
+	column Month
+		dataType: string
+		lineageTag: a725e29e-21a3-5689-b880-ebe7ccc53ad7
+		summarizeBy: none
+		sourceColumn: Month
+
+	column Amount
+		dataType: double
+		lineageTag: 725b4059-a2df-5e6c-98ad-932a335b87ba
+		summarizeBy: sum
+		sourceColumn: Amount
+
+	partition 'Claims' = m
+		mode: import
+		source =
+				let
+				    // Sample data so the model refreshes without a data source; replace with a real query.
+				    Source = #table(type table [Month = text, Amount = number], {{"2026-01", 1200.5}, {"2026-02", 980.25}})
+				in
+				    Source

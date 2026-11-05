@@ -1,0 +1,11 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/gitIntegration/platformProperties/2.0.0/schema.json",
+  "metadata": {
+    "type": "Report",
+    "displayName": "Executive KPIs - Overview"
+  },
+  "config": {
+    "version": "2.0",
+    "logicalId": "3b8684d9-33fb-5af6-a2ce-f30ed7e1ae12"
+  }
+}

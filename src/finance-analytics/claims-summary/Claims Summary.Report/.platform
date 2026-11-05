@@ -1,0 +1,11 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/gitIntegration/platformProperties/2.0.0/schema.json",
+  "metadata": {
+    "type": "Report",
+    "displayName": "Claims Summary"
+  },
+  "config": {
+    "version": "2.0",
+    "logicalId": "63f7eb0c-d547-59b5-ad2f-fc84b0e2ca03"
+  }
+}

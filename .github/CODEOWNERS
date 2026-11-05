@@ -1,0 +1,19 @@
+# Code owners decide who must approve a pull request before it can merge to main
+# (the main-branch ruleset sets "Require review from Code Owners").
+# The LAST matching rule wins, so the catch-all goes first and team folders go last.
+# Replace ORG with the GitHub organisation and create the teams before enabling the ruleset.
+
+# Everything not matched below (README, .gitignore, new top-level folders) is centrally owned.
+*                               @ORG/pbi-platform-admins
+
+# Platform-owned folders: pipelines, deployment scripts, config, tests and docs.
+/.github/                       @ORG/pbi-platform-admins
+/config/                        @ORG/pbi-platform-admins
+/scripts/                       @ORG/pbi-platform-admins
+/tests/                         @ORG/pbi-platform-admins
+/docs/                          @ORG/pbi-platform-admins
+
+# Team folders: each team's designated reviewers approve their own reports.
+# Add one line per team when onboarding it (must match config/teams.json "reviewers").
+/src/csam-analytics/            @ORG/csam-analytics-reviewers
+/src/finance-analytics/         @ORG/finance-analytics-reviewers
